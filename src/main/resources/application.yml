@@ -1,0 +1,14 @@
+spring:
+  jpa:
+    generate-ddl: off
+  datasource:
+    url: jdbc:postgresql://localhost/auth_db
+    username: postgres
+    password: postgres
+    hikari:
+      schema: auth_schema
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+    enabled: true
+  server:
+    port: 8080
