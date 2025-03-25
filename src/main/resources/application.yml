@@ -10,5 +10,13 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
     enabled: true
-  server:
-    port: 8080
+    liquibaseSchema: auth_schema
+
+server:
+  port: 8081
+#eureka:
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://localhost:8761

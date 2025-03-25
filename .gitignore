@@ -4,3 +4,4 @@
 # Ignore Gradle build output directory
 build
 /.idea/
+/src/main/resources/static/images/captcha/
