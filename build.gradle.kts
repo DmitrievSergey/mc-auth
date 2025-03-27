@@ -14,10 +14,10 @@ repositories {
     mavenCentral()
 }
 
-//extra["springCloudVersion"] = "2024.0.1"
+extra["springCloudVersion"] = "2024.0.1"
 
 dependencies {
-//    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+    implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.kafka:spring-kafka")
 
@@ -50,11 +50,11 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.5.0")
 }
 
-//dependencyManagement {
-//    imports {
-//        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-//    }
-//}
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+    }
+}
 
 tasks.withType<Test> {
     useJUnitPlatform()
