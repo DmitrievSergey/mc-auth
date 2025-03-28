@@ -1,15 +1,11 @@
 package com.skillbox.auth.security.jwt;
 
 import com.skillbox.auth.security.AppUserDetails;
-import com.skillbox.auth.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -39,7 +35,8 @@ public class JwtTokenUtils {
 
     public boolean validateJwtToken(String token) {
         try {
-            Jwts.parser().verifyWith(getSigningKey(secret));
+            JwtParser jwtParser = Jwts.parser().verifyWith(getSigningKey(secret)).build();
+            jwtParser.parse(token);
             return true;
         } catch (MalformedJwtException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
