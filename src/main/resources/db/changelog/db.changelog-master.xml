@@ -60,5 +60,23 @@
         <createIndex indexName="token" tableName="refreshtoken" unique="true">
             <column name="token"/>
         </createIndex>
+
+        <createTable tableName="reset_password">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="token" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false" foreignKeyName="fk_reset_password_users" references="users(id)"/>
+            </column>
+            <column name="expiration" type="TIMESTAMP WITH TIME ZONE" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="resetToken" tableName="reset_password" unique="true">
+            <column name="token"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>

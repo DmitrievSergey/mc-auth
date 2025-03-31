@@ -1,9 +1,7 @@
 package com.skillbox.auth.controller;
 
 import com.skillbox.auth.dto.response.ErrorResponse;
-import com.skillbox.auth.exception.CaptchaDoesNotMatchException;
-import com.skillbox.auth.exception.PasswordsDoesNotMatchException;
-import com.skillbox.auth.exception.TokenRefreshException;
+import com.skillbox.auth.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -18,24 +16,40 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ExceptionHandlerController {
     ProblemDetail errorDetail = null;
 
+    @ExceptionHandler(ResetPasswordTokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleResetTokenExpiredException(ResetPasswordTokenExpiredException exception) {
+        return new ResponseEntity<> (new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                exception.getLocalizedMessage()),
+                HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(ResetTokenNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResetTokenException(ResetTokenNotFoundException exception) {
+        return new ResponseEntity<> (new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                exception.getLocalizedMessage()),
+                HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(TokenRefreshException.class)
     public ResponseEntity<ErrorResponse> handleTokenRefreshException(TokenRefreshException exception) {
         return new ResponseEntity<> (new ErrorResponse(
-                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.UNAUTHORIZED.value(),
                 exception.getLocalizedMessage()),
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(CaptchaDoesNotMatchException.class)
     public ResponseEntity<ErrorResponse> handleCaptcha(CaptchaDoesNotMatchException exception) {
-        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value()
-                , exception.getLocalizedMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.UNAUTHORIZED.value()
+                , exception.getLocalizedMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(PasswordsDoesNotMatchException.class)
     public ResponseEntity<ErrorResponse> handlePasswords(PasswordsDoesNotMatchException exception) {
-        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value()
-                , exception.getLocalizedMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.UNAUTHORIZED.value()
+                , exception.getLocalizedMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(Exception.class)

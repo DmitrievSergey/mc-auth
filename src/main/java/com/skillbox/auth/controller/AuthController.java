@@ -66,39 +66,39 @@ public class AuthController {
     @PostMapping("/register")
     ResponseEntity<?> registerUser(@Valid @RequestBody CreateUserDtoRequest request) {
         HttpHeaders responseHeaders = new HttpHeaders();
-        try {
-            log.info("Calling registerUser");
-            log.info(request.toString());
-            if (!request.getCaptchaCode()
-                    .equals(captchaService.getCaptchaById(request.getCaptchaSecret()).getCaptchaCode())) {
-                log.info("Каптча не совпадает. капча Юзера {}, реальная капча {}", request.getCaptchaCode(),
-                        captchaService.getCaptchaById(request.getCaptchaSecret()).getCaptchaCode());
-                throw new CaptchaDoesNotMatchException("Каптча не совпадает");
-            }
-            if (!request.getPassword1().equals(request.getPassword2())) {
-                log.info("Пароли не совпадают");
-                throw new PasswordsDoesNotMatchException("Пароли не совпадают");
-            }
 
-            log.info("Calling userService.saveUser");
-            userService.saveUser(request);
-
-
-            responseHeaders.set("Access-Control-Allow-Origin",
-                    "*");
-        }catch (Exception exception) {
-            exception.printStackTrace();
+        log.info("Calling registerUser");
+        log.info(request.toString());
+        if (!request.getCaptchaCode()
+                .equals(captchaService.getCaptchaById(request.getCaptchaSecret()).getCaptchaCode())) {
+            log.info("Каптча не совпадает. капча Юзера {}, реальная капча {}", request.getCaptchaCode(),
+                    captchaService.getCaptchaById(request.getCaptchaSecret()).getCaptchaCode());
+            throw new CaptchaDoesNotMatchException("Каптча не совпадает");
         }
+        if (!request.getPassword1().equals(request.getPassword2())) {
+            log.info("Пароли не совпадают");
+            throw new PasswordsDoesNotMatchException("Пароли не совпадают");
+        }
+
+        log.info("Calling userService.saveUser");
+        userService.saveUser(request);
+
+        // TODO: если saveUser успешно, отправляем сообщение в кафку
+
+        responseHeaders.set("Access-Control-Allow-Origin",
+                "*");
+
         return ResponseEntity
                 .ok()
                 .headers(responseHeaders)
                 .build();
     }
+
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/login")
     ResponseEntity<AuthenticationDtoResponse> authUser(@Valid @RequestBody LoginDtoRequest request) {
         RefreshTokenEntity refreshToken = null;
-        String token  = null;
+        String token = null;
         try {
             log.info("Начинаем аутентифицировать пользователя");
             Authentication authentication = authenticationManager.authenticate(
@@ -117,10 +117,6 @@ public class AuthController {
 
             log.info("refreshToken = {}", refreshToken);
 
-//            refreshToken = token + 1;
-//            HttpHeaders responseHeaders = new HttpHeaders();
-//            responseHeaders.set("Access-Control-Allow-Origin",
-//                    "*");
         } catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -143,5 +139,7 @@ public class AuthController {
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                         "Refresh token is not in database!"));
     }
+
+
 
 }
