@@ -21,9 +21,14 @@ public class JwtTokenUtils {
     private Long lifetime;
 
     public String generateToken(AppUserDetails appUserDetails) {
+        return Jwts.builder().subject(appUserDetails.getUsername()).issuedAt(new Date())
+                .expiration(new Date((new Date()).getTime() + lifetime))
+                .signWith(getSigningKey(secret))
+                .claim("firstName", appUserDetails.getFirstName())
+                .claim("lastName", appUserDetails.getLastName())
+                .compact();
 
 
-        return generateTokenFromUsername(appUserDetails.getUsername());
     }
 
     public String generateTokenFromUsername(String username) {
@@ -61,6 +66,7 @@ public class JwtTokenUtils {
     }
 
     private Claims getAllClaimsFromToken(String token) {
+
         return Jwts.parser()
                 .verifyWith(getSigningKey(secret))
                 .build()
