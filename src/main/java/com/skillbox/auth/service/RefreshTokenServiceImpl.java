@@ -1,6 +1,7 @@
 package com.skillbox.auth.service;
 
 import com.skillbox.auth.entity.RefreshTokenEntity;
+import com.skillbox.auth.entity.UserEntity;
 import com.skillbox.auth.exception.TokenRefreshException;
 import com.skillbox.auth.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
