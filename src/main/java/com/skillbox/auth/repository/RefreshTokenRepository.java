@@ -9,7 +9,6 @@ import java.util.Optional;
 
 public interface RefreshTokenRepository extends CrudRepository<RefreshTokenEntity, String> {
     Optional<RefreshTokenEntity> findByToken(String token);
-
     @Modifying
     int deleteByUser(UserEntity user);
 }

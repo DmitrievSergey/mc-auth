@@ -72,10 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/register").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/password/recovery/**").permitAll()
-                        .requestMatchers("/api/v1/account/me").hasRole("USER")
-                        .requestMatchers("/api/v1/geo/country").hasRole("USER")
-                        .requestMatchers("/api/v1/friends/count").hasRole("USER")
-                        .requestMatchers("/api/v1/dialogs/unread").hasRole("USER")
+
                         .requestMatchers(imageAddress.concat("*")).permitAll()
                 )
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
