@@ -36,10 +36,10 @@ eureka:
     register-with-eureka: true
 
     service-url:
-      defaultZone: http://host.docker.internal:8761/eureka/
+      defaultZone: http://${EUREKA-HOST:localhost}:8761/eureka/
     fetch-registry: true
   instance:
-    hostname: mc-auth
+    hostname: ${mc-auth:localhost}
     prefer-ip-address: true
 #    instance-id: ${spring.application.name}:${random.uuid}
 
