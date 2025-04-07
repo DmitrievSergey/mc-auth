@@ -50,7 +50,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity findUserById(String userId) {
-        return userRepository.findById(userId).orElseThrow();
+        return userRepository.findById(userId).orElseThrow(
+
+        );
     }
 
 

@@ -89,6 +89,6 @@ public class PasswordResetController {
     }
 
     private String getAppUrl(HttpServletRequest request) {
-        return "http://localhost:8088/api/v1/auth/password/recovery/";
+        return "http://localhost:8088/change-password/";
     }
 }

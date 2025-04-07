@@ -2,11 +2,11 @@ spring:
   jpa:
     generate-ddl: off
   datasource:
-    url: jdbc:postgresql://localhost/auth_db
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://${HOST:localhost}/auth_db
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
     hikari:
-      schema: auth_schema
+      schema: ${POSTGRES_SCHEMA:auth_schema}
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
     enabled: true
@@ -16,8 +16,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username:
-    password:
+    username: ${MAIL_USER}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -31,14 +31,21 @@ spring:
 
 server:
   port: 8081
-#eureka:
-#  client:
-#    register-with-eureka: true
-#
-#    service-url:
-#      defaultZone: http://localhost:8761/eureka
-#    fetch-registry: true
-#  instance:
-#    hostname: localhost
-#    prefer-ip-address: true
+eureka:
+  client:
+    register-with-eureka: true
+
+    service-url:
+      defaultZone: http://${EUREKA-HOST:localhost}:8761/eureka/
+    fetch-registry: true
+  instance:
+    hostname: ${mc-auth:localhost}
+    prefer-ip-address: true
 #    instance-id: ${spring.application.name}:${random.uuid}
+
+app:
+  kafka:
+    enable: true
+    userRegistration: "REGISTER_TOP"
+    roomReservation: "ACCOUNT_CHANGES"
+    kafkaMessageGroupId: "NOTIFICATION"
