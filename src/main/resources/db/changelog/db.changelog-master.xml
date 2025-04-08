@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+    <changeSet id="1" author="Sergey">
+        <createTable tableName="users">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(50)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(50)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(50)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="roles" type="text[]" >
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        <createIndex indexName="email" tableName="users" unique="true">
+            <column name="email"/>
+        </createIndex>
+
+        <createTable tableName="captcha">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="VARCHAR(50)" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="id" tableName="captcha" unique="true">
+            <column name="id"/>
+        </createIndex>
+
+        <createTable tableName="refreshtoken">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false" foreignKeyName="fk_refreshtoken_users" references="users(id)"/>
+            </column>
+            <column name="token" type="VARCHAR(255)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiry_date" type="TIMESTAMP WITH TIME ZONE" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="token" tableName="refreshtoken" unique="true">
+            <column name="token"/>
+        </createIndex>
+
+        <createTable tableName="reset_password">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="token" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="VARCHAR(255)">
+                <constraints nullable="false" foreignKeyName="fk_reset_password_users" references="users(id)"/>
+            </column>
+            <column name="expiration" type="TIMESTAMP WITH TIME ZONE" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="resetToken" tableName="reset_password" unique="true">
+            <column name="token"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
