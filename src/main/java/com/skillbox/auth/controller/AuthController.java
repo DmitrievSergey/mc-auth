@@ -2,6 +2,8 @@ package com.skillbox.auth.controller;
 
 import cn.apiclub.captcha.Captcha;
 import com.github.cage.Cage;
+import com.skillbox.auth.dto.events.UserRegistration;
+import com.skillbox.auth.dto.events.UserRegistrationEvent;
 import com.skillbox.auth.dto.request.CreateUserDtoRequest;
 import com.skillbox.auth.dto.request.LoginDtoRequest;
 import com.skillbox.auth.dto.request.TokenRefreshRequest;
@@ -15,12 +17,14 @@ import com.skillbox.auth.exception.PasswordsDoesNotMatchException;
 import com.skillbox.auth.exception.TokenRefreshException;
 import com.skillbox.auth.security.AppUserDetails;
 import com.skillbox.auth.service.CaptchaService;
+import com.skillbox.auth.service.KafkaMessagePublisher;
 import com.skillbox.auth.service.RefreshTokenService;
 import com.skillbox.auth.service.UserService;
 import com.skillbox.auth.security.jwt.JwtTokenUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.KafkaException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,6 +51,7 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final JwtTokenUtils jwtTokenUtils;
     private final CaptchaService captchaService;
+    private final KafkaMessagePublisher kafkaMessagePublisher;
     @Value("${image.uploadDirectory}")
     String imageDirectory;
 
@@ -81,8 +86,13 @@ public class AuthController {
         }
 
         log.info("Calling userService.saveUser");
-        userService.saveUser(request);
 
+        try {
+            UserEntity user = userService.saveUser(request);
+            sendUserRegisteredEvent(user);
+        } catch (Exception e) {
+            log.info(e.getLocalizedMessage());
+        }
         // TODO: если saveUser успешно, отправляем сообщение в кафку
 
         responseHeaders.set("Access-Control-Allow-Origin",
@@ -140,6 +150,22 @@ public class AuthController {
                         "Refresh token is not in database!"));
     }
 
+    private void sendUserRegisteredEvent(UserEntity user) {
 
+        UserRegistrationEvent event = new UserRegistrationEvent();
+        event.setUserRegistration(new UserRegistration(
+                user.getId()
+        ,user.getFirstName()
+        ,user.getLastName()
+        , user.getEmail()));
+        try {
+            kafkaMessagePublisher.sendUserRegistrationEvent(event);
+            log.info("Message sent to kafka");
+        } catch(KafkaException exception) {
+            log.info("Message sent to kafka {}", exception.getMessage());
+        }
+
+
+    }
 
 }
