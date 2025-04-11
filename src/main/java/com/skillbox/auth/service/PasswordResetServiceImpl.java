@@ -23,13 +23,13 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     }
 
     @Override
-    public void createPasswordResetToken(UserEntity user, String passwordToken) {
+    public PasswordResetToken createPasswordResetToken(UserEntity user, String passwordToken) {
         PasswordResetToken passwordResetToken = new PasswordResetToken();
         passwordResetToken.setToken(passwordToken);
         passwordResetToken.setUser(user);
         passwordResetToken.setExpirationTime(Instant.now().plusMillis(300 * 1000));
 
-        passwordResetTokenRepository.save(passwordResetToken);
+        return passwordResetTokenRepository.save(passwordResetToken);
     }
 
     @Override
