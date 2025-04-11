@@ -26,6 +26,7 @@ public class JwtTokenUtils {
                 .signWith(getSigningKey(secret))
                 .claim("firstName", appUserDetails.getFirstName())
                 .claim("lastName", appUserDetails.getLastName())
+                .claim("userId", appUserDetails.getId())
                 .compact();
 
 
