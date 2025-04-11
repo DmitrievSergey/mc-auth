@@ -1,7 +1,6 @@
 package com.skillbox.auth.controller;
 
-import cn.apiclub.captcha.Captcha;
-import com.github.cage.Cage;
+
 import com.skillbox.auth.dto.events.UserRegistration;
 import com.skillbox.auth.dto.events.UserRegistrationEvent;
 import com.skillbox.auth.dto.request.CreateUserDtoRequest;
@@ -36,9 +35,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.imageio.ImageIO;
 import java.io.*;
-import java.util.Base64;
+import java.sql.Timestamp;
 import java.util.UUID;
 
 @Slf4j
@@ -107,6 +105,7 @@ public class AuthController {
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/login")
     ResponseEntity<AuthenticationDtoResponse> authUser(@Valid @RequestBody LoginDtoRequest request) {
+        HttpHeaders responseHeaders = new HttpHeaders();
         RefreshTokenEntity refreshToken = null;
         String token = null;
         try {
@@ -130,6 +129,12 @@ public class AuthController {
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+        responseHeaders
+                .set("Accept", "media-type");
+        responseHeaders
+                .set("Content-Type", "application/json");
+
+
         return ResponseEntity
                 .ok(new AuthenticationDtoResponse(token, refreshToken.getToken()));
     }

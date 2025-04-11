@@ -1,27 +1,23 @@
 package com.skillbox.auth.dto.response;
 
-import java.util.Date;
+
 
 public class ErrorResponse {
-    private int status;
-    private String errorMessage;
-    private Date timestamp;
+    private int error;
+    private String error_description;
+
 
     public ErrorResponse(int status, String localizedMessage) {
-        this.errorMessage = localizedMessage;
-        this.status = status;
-        this.timestamp = new Date();
+        this.error_description = localizedMessage;
+        this.error = status;
     }
 
-    public int getStatus() {
-        return status;
+    public int getError() {
+        return error;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getError_description() {
+        return error_description;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
-    }
 }

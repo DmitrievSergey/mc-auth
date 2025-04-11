@@ -43,14 +43,14 @@ public class ExceptionHandlerController {
 
     @ExceptionHandler(CaptchaDoesNotMatchException.class)
     public ResponseEntity<ErrorResponse> handleCaptcha(CaptchaDoesNotMatchException exception) {
-        return new ResponseEntity<>(new ErrorResponse(HttpStatus.UNAUTHORIZED.value()
-                , exception.getLocalizedMessage()), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value()
+                , exception.getLocalizedMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PasswordsDoesNotMatchException.class)
     public ResponseEntity<ErrorResponse> handlePasswords(PasswordsDoesNotMatchException exception) {
-        return new ResponseEntity<>(new ErrorResponse(HttpStatus.UNAUTHORIZED.value()
-                , exception.getLocalizedMessage()), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value()
+                , exception.getLocalizedMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
