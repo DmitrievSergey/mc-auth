@@ -5,15 +5,19 @@ public class UserRegistration {
     private String email;
     private String firstName;
     private String lastName;
+    private String password;
+    private String role;
 
     public UserRegistration() {
     }
 
-    public UserRegistration(String userId, String email, String firstName, String lastName) {
+    public UserRegistration(String userId, String email, String firstName, String lastName, String password, String role) {
         this.userId = userId;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.password = password;
+        this.role = role;
     }
 
     public String getUserId() {
@@ -46,5 +50,21 @@ public class UserRegistration {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

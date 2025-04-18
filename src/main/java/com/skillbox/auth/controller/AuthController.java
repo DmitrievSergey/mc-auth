@@ -36,7 +36,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
-import java.sql.Timestamp;
 import java.util.UUID;
 
 @Slf4j
@@ -160,13 +159,17 @@ public class AuthController {
         UserRegistrationEvent event = new UserRegistrationEvent();
         event.setUserRegistration(new UserRegistration(
                 user.getId()
-        ,user.getFirstName()
-        ,user.getLastName()
-        , user.getEmail()));
+                , user.getEmail()
+                , user.getFirstName()
+                , user.getLastName()
+                , user.getPassword()
+                , user.getRoles()[0].substring(5)));
+
         try {
             kafkaMessagePublisher.sendUserRegistrationEvent(event);
+
             log.info("Message sent to kafka");
-        } catch(KafkaException exception) {
+        } catch (KafkaException exception) {
             log.info("Message sent to kafka {}", exception.getMessage());
         }
 
