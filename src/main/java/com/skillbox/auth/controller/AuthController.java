@@ -3,9 +3,7 @@ package com.skillbox.auth.controller;
 
 import com.skillbox.auth.dto.events.UserRegistration;
 import com.skillbox.auth.dto.events.UserRegistrationEvent;
-import com.skillbox.auth.dto.request.CreateUserDtoRequest;
-import com.skillbox.auth.dto.request.LoginDtoRequest;
-import com.skillbox.auth.dto.request.TokenRefreshRequest;
+import com.skillbox.auth.dto.request.*;
 import com.skillbox.auth.dto.response.AuthenticationDtoResponse;
 import com.skillbox.auth.dto.response.CaptchaResponse;
 import com.skillbox.auth.dto.response.TokenRefreshResponse;
@@ -152,6 +150,18 @@ public class AuthController {
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                         "Refresh token is not in database!"));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PostMapping("/change-email-link")
+    public ResponseEntity<?> changeEmailLink(@Valid @RequestBody EmailRequest request) {
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PostMapping("/change-password-link")
+    public ResponseEntity<?> changePasswordLink(@Valid @RequestBody ChangePasswordRequest request) {
+        return ResponseEntity.ok().build();
     }
 
     private void sendUserRegisteredEvent(UserEntity user) {
