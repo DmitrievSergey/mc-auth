@@ -45,15 +45,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 );
                 log.info("Is user authenticated? " + token.isAuthenticated());
                 token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                log.info("setDetails");
                 SecurityContextHolder.getContext().setAuthentication(token);
+                log.info("set auth token");
             }
         }catch (Exception exception) {
             log.error("Cannot set user authentication: {}", exception.getLocalizedMessage());
         }
 
-
+        log.info("begin do filter");
         filterChain.doFilter(request, response);
-
+        log.info("end do filter");
 
     }
 

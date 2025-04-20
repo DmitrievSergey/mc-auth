@@ -49,5 +49,6 @@ app:
   kafka:
     enable: true
     userRegistration: "REGISTER_TOP"
+    emailChange: "ACCOUNT_CHANGES"
     resetPassword: "NOTIFICATION"
     kafkaMessageGroupId: "socialNetwork-group-id"

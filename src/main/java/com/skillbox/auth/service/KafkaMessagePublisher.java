@@ -1,6 +1,7 @@
 package com.skillbox.auth.service;
 
 
+import com.skillbox.auth.dto.events.ChangeEmailEvent;
 import com.skillbox.auth.dto.events.ResetPasswordEvent;
 import com.skillbox.auth.dto.events.UserRegistrationEvent;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +21,11 @@ public class KafkaMessagePublisher {
     @Value("${app.kafka.userRegistration}")
     private String userRegistrationTopic;
 
-    @Value("${app.kafka.resetPassword}")
-    private String resetPasswordTopic;
+    @Value("${app.kafka.emailChange}")
+    private String changeEmailTopic;
 
     private final KafkaTemplate<String, UserRegistrationEvent> template1;
-    private final KafkaTemplate<String, ResetPasswordEvent> template2;
+    private final KafkaTemplate<String, ChangeEmailEvent> template2;
 
     public void sendUserRegistrationEvent(UserRegistrationEvent event) {
         CompletableFuture<SendResult<String, UserRegistrationEvent>> result = template1.send(userRegistrationTopic, event);
@@ -40,8 +41,8 @@ public class KafkaMessagePublisher {
         });
     }
 
-    public void sendResetPasswordEvent(ResetPasswordEvent event) {
-        CompletableFuture<SendResult<String, ResetPasswordEvent>> result = template2.send(resetPasswordTopic, event);
+    public void sendChangeEmailEvent(ChangeEmailEvent event) {
+        CompletableFuture<SendResult<String, ChangeEmailEvent>> result = template2.send(changeEmailTopic, event);
 
         result.whenComplete((res, ex) -> {
             if(ex == null) {

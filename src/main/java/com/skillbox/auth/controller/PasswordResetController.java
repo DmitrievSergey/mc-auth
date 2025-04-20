@@ -53,9 +53,6 @@ public class PasswordResetController {
                 , linkForPasswordReset);
 
         PasswordResetToken resetToken = passwordResetService.createPasswordResetToken(user, token);
-        sendResetPasswordEvent(resetToken);
-        // TODO: если createPasswordResetToken успешен, отправляем сообщение в кафку
-        // TODO: После этого убираем sendSimpleMessage
 
         emailService.sendSimpleMessage(mailBody);
 
@@ -93,21 +90,4 @@ public class PasswordResetController {
         return "http://localhost:8088/change-password/";
     }
 
-    private void sendResetPasswordEvent(PasswordResetToken resetToken) {
-        ResetPassword resetPassword = new ResetPassword(
-                resetToken.getToken()
-        , resetToken.getUser().getEmail()
-        ,resetToken.getExpirationTime());
-        ResetPasswordEvent event = new ResetPasswordEvent();
-
-        event.setResetPassword(resetPassword);
-        try {
-            kafkaMessagePublisher.sendResetPasswordEvent(event);
-            log.info("Message sent to kafka");
-        } catch (KafkaException exception) {
-            log.info("Cant send message to kafka {}", exception.getMessage());
-        }
-
-
-    }
 }

@@ -1,6 +1,8 @@
 package com.skillbox.auth.controller;
 
 
+import com.skillbox.auth.dto.events.ChangeEmail;
+import com.skillbox.auth.dto.events.ChangeEmailEvent;
 import com.skillbox.auth.dto.events.UserRegistration;
 import com.skillbox.auth.dto.events.UserRegistrationEvent;
 import com.skillbox.auth.dto.request.*;
@@ -102,11 +104,14 @@ public class AuthController {
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/login")
     ResponseEntity<AuthenticationDtoResponse> authUser(@Valid @RequestBody LoginDtoRequest request) {
+        log.info("Начинаем аутентифицировать пользователя");
         HttpHeaders responseHeaders = new HttpHeaders();
         RefreshTokenEntity refreshToken = null;
         String token = null;
         try {
             log.info("Начинаем аутентифицировать пользователя");
+            log.info("User name {}", request.getEmail());
+            log.info("User password {}", request.getPassword());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
@@ -153,15 +158,58 @@ public class AuthController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    @PostMapping("/change-email-link")
-    public ResponseEntity<?> changeEmailLink(@Valid @RequestBody EmailRequest request) {
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PostMapping ("/change-email-link")
+    public ResponseEntity<?> changeEmailLink(@Valid @RequestBody EmailRequest request,
+                                             @RequestHeader(name = "Authorization") String jwt) {
+        String email = jwtTokenUtils.getUserName(jwt.substring(7));
+        if(!email.equals(request.getEmail())) {
+            UserEntity user = userService.findUserByEmail(email);
+            user.setEmail(request.getEmail());
+            //TODO: Поймать EmailAlreadyExists
+            try{
+                userService.saveUser(user);
+                sendChangeEmailEvent(user);
+            } catch (Exception e) {
+                log.info(e.getLocalizedMessage());
+            }
+
+        }
+        log.info("email {}",request.getEmail());
         return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/change-password-link")
-    public ResponseEntity<?> changePasswordLink(@Valid @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<?> changePasswordLink(@Valid @RequestBody ChangePasswordRequest request
+    , @RequestHeader(name = "Authorization") String jwt) {
+        String email = jwtTokenUtils.getUserName(jwt.substring(7));
+        UserEntity user = userService.findUserByEmail(email);
+        log.info("email {}", email);
+        log.info("User {}", user.getEmail());
+        userService.saveUser(request, user);
         return ResponseEntity.ok().build();
+    }
+
+    private void sendChangeEmailEvent(UserEntity user) {
+        ChangeEmailEvent event  = new ChangeEmailEvent();
+
+        event.setChangeEmail(new ChangeEmail(
+                user.getId()
+                , user.getEmail()
+        ));
+
+        try{
+            kafkaMessagePublisher.sendChangeEmailEvent(event);
+            log.info("Message sent to kafka");
+        } catch (KafkaException exception) {
+            log.info("Message sent to kafka {}", exception.getMessage());
+        }
     }
 
     private void sendUserRegisteredEvent(UserEntity user) {
