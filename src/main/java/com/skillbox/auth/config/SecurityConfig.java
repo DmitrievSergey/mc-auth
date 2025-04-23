@@ -72,6 +72,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/register").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/password/recovery/**").permitAll()
+                        .requestMatchers("/api/v1/auth/change-password-link").permitAll()
+                        .requestMatchers("/api/v1/auth/change-email-link").permitAll()
+                        .requestMatchers("/api/v1/auth/logout").permitAll()
 
                         .requestMatchers(imageAddress.concat("*")).permitAll()
                 )

@@ -10,7 +10,7 @@ public class LoginDtoRequest {
     private String email;
 
     @NotNull
-    @Size(min = 10, max = 20, message = "Пароль пользователя не должен быть меньше {min} символов и не должен быть больше {max} символов")
+    @Size(min = 8, max = 20, message = "Пароль пользователя не должен быть меньше {min} символов и не должен быть больше {max} символов")
     private String password;
 
     public String getEmail() {

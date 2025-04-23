@@ -7,6 +7,8 @@ spring:
     password: ${POSTGRES_PASSWORD:postgres}
     hikari:
       schema: ${POSTGRES_SCHEMA:auth_schema}
+  kafka:
+    bootstrap-servers: PLAINTEXT://broker:9092
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
     enabled: true
@@ -47,5 +49,6 @@ app:
   kafka:
     enable: true
     userRegistration: "REGISTER_TOP"
-    roomReservation: "ACCOUNT_CHANGES"
-    kafkaMessageGroupId: "NOTIFICATION"
+    emailChange: "ACCOUNT_CHANGES"
+    resetPassword: "NOTIFICATION"
+    kafkaMessageGroupId: "socialNetwork-group-id"

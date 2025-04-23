@@ -2,6 +2,7 @@ package com.skillbox.auth.controller;
 
 import com.skillbox.auth.dto.response.ErrorResponse;
 import com.skillbox.auth.exception.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -11,7 +12,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-
+@Slf4j
 @RestControllerAdvice
 public class ExceptionHandlerController {
     ProblemDetail errorDetail = null;
@@ -42,14 +43,14 @@ public class ExceptionHandlerController {
 
     @ExceptionHandler(CaptchaDoesNotMatchException.class)
     public ResponseEntity<ErrorResponse> handleCaptcha(CaptchaDoesNotMatchException exception) {
-        return new ResponseEntity<>(new ErrorResponse(HttpStatus.UNAUTHORIZED.value()
-                , exception.getLocalizedMessage()), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value()
+                , exception.getLocalizedMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PasswordsDoesNotMatchException.class)
     public ResponseEntity<ErrorResponse> handlePasswords(PasswordsDoesNotMatchException exception) {
-        return new ResponseEntity<>(new ErrorResponse(HttpStatus.UNAUTHORIZED.value()
-                , exception.getLocalizedMessage()), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value()
+                , exception.getLocalizedMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
@@ -70,6 +71,7 @@ public class ExceptionHandlerController {
             errorDetail = ProblemDetail
                     .forStatusAndDetail(HttpStatusCode.valueOf(401), exception.getMessage());
             errorDetail.setProperty("unknown_thing_reason", "Bad_credentials");
+
         }
 
         return errorDetail;

@@ -1,10 +1,11 @@
 package com.skillbox.auth.controller;
 
-import cn.apiclub.captcha.Captcha;
-import com.github.cage.Cage;
-import com.skillbox.auth.dto.request.CreateUserDtoRequest;
-import com.skillbox.auth.dto.request.LoginDtoRequest;
-import com.skillbox.auth.dto.request.TokenRefreshRequest;
+
+import com.skillbox.auth.dto.events.ChangeEmail;
+import com.skillbox.auth.dto.events.ChangeEmailEvent;
+import com.skillbox.auth.dto.events.UserRegistration;
+import com.skillbox.auth.dto.events.UserRegistrationEvent;
+import com.skillbox.auth.dto.request.*;
 import com.skillbox.auth.dto.response.AuthenticationDtoResponse;
 import com.skillbox.auth.dto.response.CaptchaResponse;
 import com.skillbox.auth.dto.response.TokenRefreshResponse;
@@ -15,12 +16,14 @@ import com.skillbox.auth.exception.PasswordsDoesNotMatchException;
 import com.skillbox.auth.exception.TokenRefreshException;
 import com.skillbox.auth.security.AppUserDetails;
 import com.skillbox.auth.service.CaptchaService;
+import com.skillbox.auth.service.KafkaMessagePublisher;
 import com.skillbox.auth.service.RefreshTokenService;
 import com.skillbox.auth.service.UserService;
 import com.skillbox.auth.security.jwt.JwtTokenUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.KafkaException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,9 +35,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.imageio.ImageIO;
 import java.io.*;
-import java.util.Base64;
 import java.util.UUID;
 
 @Slf4j
@@ -47,6 +48,7 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final JwtTokenUtils jwtTokenUtils;
     private final CaptchaService captchaService;
+    private final KafkaMessagePublisher kafkaMessagePublisher;
     @Value("${image.uploadDirectory}")
     String imageDirectory;
 
@@ -81,8 +83,13 @@ public class AuthController {
         }
 
         log.info("Calling userService.saveUser");
-        userService.saveUser(request);
 
+        try {
+            UserEntity user = userService.saveUser(request);
+            sendUserRegisteredEvent(user);
+        } catch (Exception e) {
+            log.info(e.getLocalizedMessage());
+        }
         // TODO: если saveUser успешно, отправляем сообщение в кафку
 
         responseHeaders.set("Access-Control-Allow-Origin",
@@ -97,10 +104,14 @@ public class AuthController {
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/login")
     ResponseEntity<AuthenticationDtoResponse> authUser(@Valid @RequestBody LoginDtoRequest request) {
+        log.info("Начинаем аутентифицировать пользователя");
+        HttpHeaders responseHeaders = new HttpHeaders();
         RefreshTokenEntity refreshToken = null;
         String token = null;
         try {
             log.info("Начинаем аутентифицировать пользователя");
+            log.info("User name {}", request.getEmail());
+            log.info("User password {}", request.getPassword());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
@@ -120,6 +131,12 @@ public class AuthController {
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+        responseHeaders
+                .set("Accept", "media-type");
+        responseHeaders
+                .set("Content-Type", "application/json");
+
+
         return ResponseEntity
                 .ok(new AuthenticationDtoResponse(token, refreshToken.getToken()));
     }
@@ -140,6 +157,81 @@ public class AuthController {
                         "Refresh token is not in database!"));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok().build();
+    }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PostMapping ("/change-email-link")
+    public ResponseEntity<?> changeEmailLink(@Valid @RequestBody EmailRequest request,
+                                             @RequestHeader(name = "Authorization") String jwt) {
+        String email = jwtTokenUtils.getUserName(jwt.substring(7));
+        if(!email.equals(request.getEmail())) {
+            UserEntity user = userService.findUserByEmail(email);
+            user.setEmail(request.getEmail());
+            //TODO: Поймать EmailAlreadyExists
+            try{
+                userService.saveUser(user);
+                sendChangeEmailEvent(user);
+            } catch (Exception e) {
+                log.info(e.getLocalizedMessage());
+            }
+
+        }
+        log.info("email {}",request.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PostMapping("/change-password-link")
+    public ResponseEntity<?> changePasswordLink(@Valid @RequestBody ChangePasswordRequest request
+    , @RequestHeader(name = "Authorization") String jwt) {
+        String email = jwtTokenUtils.getUserName(jwt.substring(7));
+        UserEntity user = userService.findUserByEmail(email);
+        log.info("email {}", email);
+        log.info("User {}", user.getEmail());
+        userService.saveUser(request, user);
+        return ResponseEntity.ok().build();
+    }
+
+    private void sendChangeEmailEvent(UserEntity user) {
+        ChangeEmailEvent event  = new ChangeEmailEvent();
+
+        event.setChangeEmail(new ChangeEmail(
+                user.getId()
+                , user.getEmail()
+        ));
+
+        try{
+            kafkaMessagePublisher.sendChangeEmailEvent(event);
+            log.info("Message sent to kafka");
+        } catch (KafkaException exception) {
+            log.info("Message sent to kafka {}", exception.getMessage());
+        }
+    }
+
+    private void sendUserRegisteredEvent(UserEntity user) {
+
+        UserRegistrationEvent event = new UserRegistrationEvent();
+        event.setUserRegistration(new UserRegistration(
+                user.getId()
+                , user.getEmail()
+                , user.getFirstName()
+                , user.getLastName()
+                , user.getPassword()
+                , user.getRoles()[0].substring(5)));
+
+        try {
+            kafkaMessagePublisher.sendUserRegistrationEvent(event);
+
+            log.info("Message sent to kafka");
+        } catch (KafkaException exception) {
+            log.info("Message sent to kafka {}", exception.getMessage());
+        }
+
+
+    }
 
 }
