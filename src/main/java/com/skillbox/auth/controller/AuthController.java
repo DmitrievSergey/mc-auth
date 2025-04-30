@@ -71,8 +71,10 @@ public class AuthController {
 
         log.info("Calling registerUser");
         log.info(request.toString());
+        String captchaSecret = request.getCaptchaSecret();
+        log.info(captchaSecret);
         if (!request.getCaptchaCode()
-                .equals(captchaService.getCaptchaById(request.getCaptchaSecret()).getCaptchaCode())) {
+                .equals(captchaService.getCaptchaById(captchaSecret).getCaptchaCode())) {
             log.info("Каптча не совпадает. капча Юзера {}, реальная капча {}", request.getCaptchaCode(),
                     captchaService.getCaptchaById(request.getCaptchaSecret()).getCaptchaCode());
             throw new CaptchaDoesNotMatchException("Каптча не совпадает");

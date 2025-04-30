@@ -71,6 +71,7 @@ public class ExceptionHandlerController {
             errorDetail = ProblemDetail
                     .forStatusAndDetail(HttpStatusCode.valueOf(401), exception.getMessage());
             errorDetail.setProperty("unknown_thing_reason", "Bad_credentials");
+            exception.printStackTrace();
 
         }
 
