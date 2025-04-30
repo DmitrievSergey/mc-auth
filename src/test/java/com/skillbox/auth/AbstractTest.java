@@ -2,39 +2,31 @@ package com.skillbox.auth;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skillbox.auth.entity.UserEntity;
 import com.skillbox.auth.repository.UserRepository;
-import com.skillbox.auth.service.CaptchaService;
 import com.skillbox.auth.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+
 @AutoConfigureMockMvc
-@Transactional
 @ActiveProfiles({"test"})
 @Testcontainers
 public abstract class AbstractTest implements PostgreBaseTest {
     static  {
         POSTGRE_SQL_CONTAINER.start();
     }
-
-    @Autowired
-    protected CaptchaService hotelService;
 
     @Autowired
     protected UserService userService;
@@ -52,7 +44,7 @@ public abstract class AbstractTest implements PostgreBaseTest {
 
 
     @Autowired
-    protected MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @Autowired
     protected ObjectMapper objectMapper;
