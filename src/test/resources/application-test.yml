@@ -1,0 +1,10 @@
+spring:
+  jpa:
+    generate-ddl: off
+  datasource:
+    url: jdbc:postgresql://${HOST:localhost}/auth_db
+    username: postgres
+    password: postgres
+    hikari:
+      connection-init-sql: CREATE SCHEMA IF NOT EXISTS auth_schema
+      schema: auth_schema
