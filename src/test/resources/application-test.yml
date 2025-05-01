@@ -8,3 +8,16 @@ spring:
     hikari:
       connection-init-sql: CREATE SCHEMA IF NOT EXISTS auth_schema
       schema: auth_schema
+
+eureka:
+  client:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    org:
+      springframework:
+        test:
+          context:
+            jdbc: DEBUG

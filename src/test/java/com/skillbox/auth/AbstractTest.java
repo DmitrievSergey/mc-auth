@@ -34,41 +34,18 @@ public abstract class AbstractTest implements PostgreBaseTest {
     @Autowired
     private UserRepository userRepository;
 
-    @BeforeAll
-    public static void beforeAll() {
-        POSTGRE_SQL_CONTAINER.withEnv("spring.datasource.url", (p) -> POSTGRE_SQL_CONTAINER.getJdbcUrl());
-        POSTGRE_SQL_CONTAINER.withEnv("spring.datasource.username", (p) -> POSTGRE_SQL_CONTAINER.getUsername());
-        POSTGRE_SQL_CONTAINER.withEnv("spring.datasource.password", (p) -> POSTGRE_SQL_CONTAINER.getPassword());
-
-    }
-
-
     @Autowired
     MockMvc mockMvc;
 
     @Autowired
     protected ObjectMapper objectMapper;
 
-    @BeforeEach
-    private void setUp() {
-//        UserEntity userAdmin = new UserEntity();
-//        userAdmin.setEmail("admin@admin.ru");
-//        userAdmin.setPassword("adminpassword");
-//        userAdmin.setFirstName("Alex");
-//        userAdmin.setRoles(new String[]{"ADMIN_ROLE"});
-//        userService.saveUser(userAdmin);
-//
-//        UserEntity userUser = new UserEntity();
-//        userUser.setEmail("roy@user.ru");
-//        userUser.setPassword("userpassword");
-//        userUser.setFirstName("Roy");
-//        userUser.setRoles(new String[]{"USER_ROLE"});
-//        userService.saveUser(userUser);
-    }
+    @BeforeAll
+    public static void beforeAll() {
+        POSTGRE_SQL_CONTAINER.withEnv("spring.datasource.url", (p) -> POSTGRE_SQL_CONTAINER.getJdbcUrl());
+        POSTGRE_SQL_CONTAINER.withEnv("spring.datasource.username", (p) -> POSTGRE_SQL_CONTAINER.getUsername());
+        POSTGRE_SQL_CONTAINER.withEnv("spring.datasource.password", (p) -> POSTGRE_SQL_CONTAINER.getPassword());
 
-    @AfterEach
-    private void tearDown() {
-        userRepository.deleteAll();
     }
 
     protected ResultActions post(String path, Object pathVariable, Object object) throws Exception {

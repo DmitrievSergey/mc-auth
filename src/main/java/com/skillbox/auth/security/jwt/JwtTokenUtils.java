@@ -66,6 +66,18 @@ public class JwtTokenUtils {
         return getAllClaimsFromToken(token).get("roles", List.class);
     }
 
+    public String getUserId(String token) {
+        return getAllClaimsFromToken(token).get("userId", String.class);
+    }
+
+    public String getFirstName(String token) {
+        return getAllClaimsFromToken(token).get("firstName", String.class);
+    }
+
+    public String getLastName(String token) {
+        return getAllClaimsFromToken(token).get("lastName", String.class);
+    }
+
     private Claims getAllClaimsFromToken(String token) {
 
         return Jwts.parser()
