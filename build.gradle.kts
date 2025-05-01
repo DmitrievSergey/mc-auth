@@ -48,7 +48,7 @@ dependencies {
     testImplementation("org.testcontainers:kafka:1.17.6")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.awaitility:awaitility:4.2.0")
+    testImplementation("org.awaitility:awaitility:4.3.0")
     testImplementation("org.mockito:mockito-core:5.5.0")
 }
 
