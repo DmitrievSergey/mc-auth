@@ -3,9 +3,14 @@ package com.skillbox.auth.kafka;
 import com.skillbox.auth.AbstractTest;
 import com.skillbox.auth.KafkaBaseTest;
 import com.skillbox.auth.controller.ImageController;
+import com.skillbox.auth.dto.events.ChangeEmailEvent;
 import com.skillbox.auth.dto.events.UserRegistrationEvent;
 import com.skillbox.auth.dto.request.CreateUserDtoRequest;
+import com.skillbox.auth.dto.request.EmailRequest;
 import com.skillbox.auth.entity.CaptchaEntity;
+import com.skillbox.auth.entity.UserEntity;
+import com.skillbox.auth.security.AppUserDetails;
+import com.skillbox.auth.security.jwt.JwtTokenUtils;
 import com.skillbox.auth.service.CaptchaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -17,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.AcknowledgingMessageListener;
@@ -46,11 +52,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Sql(scripts = "classpath:db/cleanUp.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class KafkaTests extends AbstractTest implements KafkaBaseTest {
 
+    @Autowired
+    JwtTokenUtils jwtTokenUtils;
+
     @MockitoBean
     CaptchaService captchaServiceMock;
 
     @MockitoBean
     ImageController imageController;
+
 
     private static KafkaMessageListenerContainer<String, ?> clientConsumer;
 
@@ -69,7 +79,7 @@ public class KafkaTests extends AbstractTest implements KafkaBaseTest {
         clientConsumerProps.put(MAX_POLL_INTERVAL_MS_CONFIG, "60000");
 
 
-        final var deserializer = new JsonDeserializer<UserRegistrationEvent>();
+        final var deserializer = new JsonDeserializer<Object>();
         deserializer.addTrustedPackages("*");
         final var clientConsumerFactory = new DefaultKafkaConsumerFactory<>(
                 clientConsumerProps,
@@ -77,7 +87,7 @@ public class KafkaTests extends AbstractTest implements KafkaBaseTest {
                 deserializer
         );
 
-        final var clientConsumerContainerProperties = new ContainerProperties("REGISTER_TOP");
+        final var clientConsumerContainerProperties = new ContainerProperties("REGISTER_TOP", "ACCOUNT_CHANGES");
         clientConsumerContainerProperties.setAckMode(MANUAL);
         clientConsumer = new KafkaMessageListenerContainer<>(clientConsumerFactory, clientConsumerContainerProperties);
 
@@ -125,6 +135,26 @@ public class KafkaTests extends AbstractTest implements KafkaBaseTest {
                 });
     }
 
+    @Test
+    @DisplayName("Test send change email event")
+    @Sql(scripts = "classpath:db/createUser.sql")
+    public void testSendChangeEmailEvent() throws Exception {
+        String token = jwtTokenUtils.generateToken(AppUserDetails.build(getAuthorizedUser()));
+        post("/api/v1/auth/change-email-link", getUniqueEmailRequest(), "Authorization", "Bearer ".concat(token))
+                .andExpect(status().isOk());
+
+        await()
+                .pollInterval(Duration.ofSeconds(3))
+                .atMost(Duration.ofSeconds(15))
+                .untilAsserted(() -> {
+                    final var response = Optional.ofNullable(CLIENT_CONSUMER_RECORDS.poll());
+
+                    ChangeEmailEvent changeEmailEvent = (ChangeEmailEvent) response.get().value();
+                    assertNotNull(changeEmailEvent.getChangeEmail().getUserId());
+                    assertEquals(getUniqueEmailRequest().getEmail(), changeEmailEvent.getChangeEmail().getEmail());
+                });
+    }
+
     @NotNull
     private CreateUserDtoRequest getUserDtoWithCorrectCaptcha() {
         return new CreateUserDtoRequest(
@@ -133,8 +163,28 @@ public class KafkaTests extends AbstractTest implements KafkaBaseTest {
                 , "password"
                 , "password"
                 , "alex2003@mail.ru"
-                ,"testCaptcha"
-                ,"123");
+                , "testCaptcha"
+                , "123");
+    }
+
+    @NotNull
+    private UserEntity getAuthorizedUser() {
+        return new UserEntity(
+                "e913b22d-5d21-4998-ae8f-a258fca8913f"
+                , "Alexander"
+                , "Ivanov"
+                ,"$2a$12$MDXgqILUpMRFvR4PUGtZW.xyLPRxMbAnnvsCOvQZ0ApBrd11lPka6"
+                , "alexIv@mail.ru"
+                , new String[]{"ROLE_USER"}
+        );
+    }
+
+
+    @NotNull
+    private EmailRequest getUniqueEmailRequest() {
+        return new EmailRequest(
+                "alex2003@mail.ru"
+        );
     }
 
     @NotNull
