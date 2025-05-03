@@ -32,7 +32,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
@@ -105,7 +107,8 @@ public class AuthController {
 
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/login")
-    ResponseEntity<AuthenticationDtoResponse> authUser(@Valid @RequestBody LoginDtoRequest request) {
+    ResponseEntity<AuthenticationDtoResponse> authUser(@Valid @RequestBody LoginDtoRequest request)
+    {
         log.info("Начинаем аутентифицировать пользователя");
         HttpHeaders responseHeaders = new HttpHeaders();
         RefreshTokenEntity refreshToken = null;
@@ -151,8 +154,9 @@ public class AuthController {
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshTokenEntity::getUser)
+                .map(AppUserDetails::build)
                 .map(user -> {
-                    String token = jwtTokenUtils.generateTokenFromUsername(user.getEmail());
+                    String token = jwtTokenUtils.generateToken(user);
                     return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
@@ -162,6 +166,8 @@ public class AuthController {
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
+
+        log.info("isAuthenticate {}",SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
         return ResponseEntity.ok().build();
     }
 

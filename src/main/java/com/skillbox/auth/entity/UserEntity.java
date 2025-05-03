@@ -77,4 +77,13 @@ public class UserEntity implements Serializable {
     public String[] getRoles() {
         return roles;
     }
+
+    public UserEntity(String id, String firstName, String lastName, String password, String email, String[] roles) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.password = password;
+        this.email = email;
+        this.roles = roles;
+    }
 }

@@ -3,13 +3,13 @@ package com.skillbox.auth.controller;
 import com.skillbox.auth.AbstractTest;
 import com.skillbox.auth.dto.request.LoginDtoRequest;
 import com.skillbox.auth.dto.response.AuthenticationDtoResponse;
+import com.skillbox.auth.repository.RefreshTokenRepository;
 import com.skillbox.auth.security.jwt.JwtTokenUtils;
 import com.skillbox.auth.service.RefreshTokenService;
-import com.skillbox.auth.service.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,13 +24,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(MockitoExtension.class)
-@Sql(scripts = "classpath:db/cleanUp.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class TestAuthControllerLogin extends AbstractTest {
     @Autowired
     JwtTokenUtils jwtTokenUtils;
 
     @Autowired
     RefreshTokenService service;
+
+    @Autowired
+    RefreshTokenRepository tokenRepository;
+
+    @AfterEach
+    public void clean() {
+        tokenRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("Log in user with correct credentials")

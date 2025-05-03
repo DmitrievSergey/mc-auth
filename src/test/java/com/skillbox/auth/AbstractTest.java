@@ -32,10 +32,10 @@ public abstract class AbstractTest implements PostgreBaseTest {
     protected UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
+    protected UserRepository userRepository;
 
     @Autowired
-    MockMvc mockMvc;
+    protected MockMvc mockMvc;
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -67,6 +67,23 @@ public abstract class AbstractTest implements PostgreBaseTest {
     protected ResultActions post(String path, String pathParamName, String pathParam, Object object) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders
                 .post(path).param(pathParamName, pathParam)
+                .content(objectMapper.writeValueAsString(object))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+    }
+
+    protected ResultActions post(String path) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders
+                .post(path)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+    }
+
+    protected ResultActions post(String path, Object object, String headerName, String header) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders
+                .post(path)
+                        .header(headerName, header)
+                .with(csrf())
                 .content(objectMapper.writeValueAsString(object))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
