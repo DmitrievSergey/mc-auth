@@ -3,6 +3,7 @@ package com.skillbox.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skillbox.auth.repository.UserRepository;
+import com.skillbox.auth.security.AppUserDetails;
 import com.skillbox.auth.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;

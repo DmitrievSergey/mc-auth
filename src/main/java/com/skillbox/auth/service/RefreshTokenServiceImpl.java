@@ -5,6 +5,7 @@ import com.skillbox.auth.entity.UserEntity;
 import com.skillbox.auth.exception.TokenRefreshException;
 import com.skillbox.auth.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService {
@@ -36,6 +38,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshToken = refreshTokenRepository.save(refreshToken);
         return refreshToken;
     }
+
+    @Override
+    @Transactional
+    public void deleteToken(UserEntity user) {
+        log.info("Зашли в delete token");
+        refreshTokenRepository.deleteByUser(user);
+    }
+
     @Override
     public RefreshTokenEntity verifyExpiration(RefreshTokenEntity token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
