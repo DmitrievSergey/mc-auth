@@ -20,6 +20,8 @@ import com.skillbox.auth.service.KafkaMessagePublisher;
 import com.skillbox.auth.service.RefreshTokenService;
 import com.skillbox.auth.service.UserService;
 import com.skillbox.auth.security.jwt.JwtTokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
@@ -165,9 +168,18 @@ public class AuthController {
 
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("User : {}", authentication.getName());
+        log.info("Credentials : {}", authentication.getCredentials());
+        if (authentication != null && authentication.isAuthenticated()) {
+            UserEntity user = userService.findUserByEmail(authentication.getName());
+            log.info("Получили пользователя {}", user);
+            log.info("Вызываем delete token");
+            refreshTokenService.deleteToken(user);
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        }
 
-        log.info("isAuthenticate {}",SecurityContextHolder.getContext().getAuthentication().isAuthenticated());
         return ResponseEntity.ok().build();
     }
 
