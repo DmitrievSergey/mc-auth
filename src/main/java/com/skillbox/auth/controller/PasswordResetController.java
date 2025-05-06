@@ -87,7 +87,7 @@ public class PasswordResetController {
 
 
     private String getAppUrl(HttpServletRequest request) {
-        return "http://localhost:8088/change-password/";
+        return "http://185.129.146.54:80/change-password/";
     }
 
 }
