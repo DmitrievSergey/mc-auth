@@ -69,7 +69,7 @@ public class TestAuthControllerLogin extends AbstractTest {
     public void testUserWithInCorrectCredentialsCanTLogIn() throws Exception {
 
         ResultActions resultActions = post("/api/v1/auth/login", getUserDtoWithInCorrectCredentials())
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isBadRequest());
 
     }
 

@@ -53,6 +53,12 @@ public class ExceptionHandlerController {
                 , exception.getLocalizedMessage()), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidLoginOrPasswordException.class)
+    public ResponseEntity<ErrorResponse> handlePasswords(InvalidLoginOrPasswordException exception) {
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST.value()
+                , exception.getLocalizedMessage()), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleSecurityExceptions(Exception exception) {
         if(exception instanceof AccessDeniedException) {
@@ -61,11 +67,11 @@ public class ExceptionHandlerController {
             errorDetail.setProperty("access_denied_reason", "Not_authorize");
         }
 
-        if(exception instanceof BadCredentialsException) {
-            errorDetail = ProblemDetail
-                    .forStatusAndDetail(HttpStatusCode.valueOf(401), exception.getMessage());
-            errorDetail.setProperty("access_denied_reason", "Bad_credentials");
-        }
+//        if(exception instanceof BadCredentialsException) {
+//            errorDetail = ProblemDetail
+//                    .forStatusAndDetail(HttpStatusCode.valueOf(401), exception.getMessage());
+//            errorDetail.setProperty("access_denied_reason", "Bad_credentials");
+//        }
 
         if(exception != null) {
             errorDetail = ProblemDetail

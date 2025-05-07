@@ -12,6 +12,7 @@ import com.skillbox.auth.dto.response.TokenRefreshResponse;
 import com.skillbox.auth.entity.RefreshTokenEntity;
 import com.skillbox.auth.entity.UserEntity;
 import com.skillbox.auth.exception.CaptchaDoesNotMatchException;
+import com.skillbox.auth.exception.InvalidLoginOrPasswordException;
 import com.skillbox.auth.exception.PasswordsDoesNotMatchException;
 import com.skillbox.auth.exception.TokenRefreshException;
 import com.skillbox.auth.security.AppUserDetails;
@@ -32,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -136,7 +138,10 @@ public class AuthController {
 
             log.info("refreshToken = {}", refreshToken);
 
-        } catch (Exception exception) {
+        } catch (BadCredentialsException exception) {
+            throw new InvalidLoginOrPasswordException("Неправильный логин или пароль");
+        }
+        catch (Exception exception) {
             exception.printStackTrace();
         }
         responseHeaders
