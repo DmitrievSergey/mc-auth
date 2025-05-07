@@ -7,7 +7,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public interface PostgreBaseTest {
 
     PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER = new PostgreSQLContainer<>(
-            "postgres:12.3"
+            "postgres:17.3"
     );
 
     @DynamicPropertySource
