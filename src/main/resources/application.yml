@@ -49,6 +49,11 @@ app:
   kafka:
     enable: true
     userRegistration: "REGISTER_TOP"
-    emailChange: "ACCOUNT_CHANGES"
+    accountChange: "ACCOUNT_CHANGES"
     resetPassword: "NOTIFICATION"
     kafkaMessageGroupId: "socialNetwork-group-id"
+
+logging:
+  level:
+    root: warn
+    org.appache.kafka: warn

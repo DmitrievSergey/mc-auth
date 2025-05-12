@@ -21,7 +21,7 @@ public class KafkaMessagePublisher {
     @Value("${app.kafka.userRegistration}")
     private String userRegistrationTopic;
 
-    @Value("${app.kafka.emailChange}")
+    @Value("${app.kafka.accountChange}")
     private String changeEmailTopic;
 
     private final KafkaTemplate<String, UserRegistrationEvent> template1;
