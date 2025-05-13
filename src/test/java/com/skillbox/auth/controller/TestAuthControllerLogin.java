@@ -3,6 +3,7 @@ package com.skillbox.auth.controller;
 import com.skillbox.auth.AbstractTest;
 import com.skillbox.auth.dto.request.LoginDtoRequest;
 import com.skillbox.auth.dto.response.AuthenticationDtoResponse;
+import com.skillbox.auth.listeners.AuthListener;
 import com.skillbox.auth.repository.RefreshTokenRepository;
 import com.skillbox.auth.security.jwt.JwtTokenUtils;
 import com.skillbox.auth.service.RefreshTokenService;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -25,6 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(MockitoExtension.class)
 public class TestAuthControllerLogin extends AbstractTest {
+    @MockitoBean
+    AuthListener authListener;
+
     @Autowired
     JwtTokenUtils jwtTokenUtils;
 

@@ -5,6 +5,7 @@ import com.skillbox.auth.dto.request.CreateUserDtoRequest;
 import com.skillbox.auth.entity.CaptchaEntity;
 import com.skillbox.auth.exception.CaptchaDoesNotMatchException;
 import com.skillbox.auth.exception.PasswordsDoesNotMatchException;
+import com.skillbox.auth.listeners.AuthListener;
 import com.skillbox.auth.service.CaptchaService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @Sql(scripts = "classpath:db/cleanUp.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class TestAuthControllerRegistration extends AbstractTest {
+
+    @MockitoBean
+    AuthListener authListener;
 
     @MockitoBean
     CaptchaService captchaServiceMock;
