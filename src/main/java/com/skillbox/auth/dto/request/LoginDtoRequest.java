@@ -13,6 +13,11 @@ public class LoginDtoRequest {
     @Size(min = 8, max = 20, message = "Пароль пользователя не должен быть меньше {min} символов и не должен быть больше {max} символов")
     private String password;
 
+    public LoginDtoRequest(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+
     public String getEmail() {
         return email;
     }

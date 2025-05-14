@@ -12,6 +12,7 @@ import com.skillbox.auth.dto.response.TokenRefreshResponse;
 import com.skillbox.auth.entity.RefreshTokenEntity;
 import com.skillbox.auth.entity.UserEntity;
 import com.skillbox.auth.exception.CaptchaDoesNotMatchException;
+import com.skillbox.auth.exception.InvalidLoginOrPasswordException;
 import com.skillbox.auth.exception.PasswordsDoesNotMatchException;
 import com.skillbox.auth.exception.TokenRefreshException;
 import com.skillbox.auth.security.AppUserDetails;
@@ -20,6 +21,8 @@ import com.skillbox.auth.service.KafkaMessagePublisher;
 import com.skillbox.auth.service.RefreshTokenService;
 import com.skillbox.auth.service.UserService;
 import com.skillbox.auth.security.jwt.JwtTokenUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +33,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
@@ -71,8 +78,10 @@ public class AuthController {
 
         log.info("Calling registerUser");
         log.info(request.toString());
+        String captchaSecret = request.getCaptchaSecret();
+        log.info(captchaSecret);
         if (!request.getCaptchaCode()
-                .equals(captchaService.getCaptchaById(request.getCaptchaSecret()).getCaptchaCode())) {
+                .equals(captchaService.getCaptchaById(captchaSecret).getCaptchaCode())) {
             log.info("Каптча не совпадает. капча Юзера {}, реальная капча {}", request.getCaptchaCode(),
                     captchaService.getCaptchaById(request.getCaptchaSecret()).getCaptchaCode());
             throw new CaptchaDoesNotMatchException("Каптча не совпадает");
@@ -103,7 +112,8 @@ public class AuthController {
 
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/login")
-    ResponseEntity<AuthenticationDtoResponse> authUser(@Valid @RequestBody LoginDtoRequest request) {
+    ResponseEntity<AuthenticationDtoResponse> authUser(@Valid @RequestBody LoginDtoRequest request)
+    {
         log.info("Начинаем аутентифицировать пользователя");
         HttpHeaders responseHeaders = new HttpHeaders();
         RefreshTokenEntity refreshToken = null;
@@ -128,7 +138,10 @@ public class AuthController {
 
             log.info("refreshToken = {}", refreshToken);
 
-        } catch (Exception exception) {
+        } catch (BadCredentialsException exception) {
+            throw new InvalidLoginOrPasswordException("Неправильный логин или пароль");
+        }
+        catch (Exception exception) {
             exception.printStackTrace();
         }
         responseHeaders
@@ -149,8 +162,9 @@ public class AuthController {
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshTokenEntity::getUser)
+                .map(AppUserDetails::build)
                 .map(user -> {
-                    String token = jwtTokenUtils.generateTokenFromUsername(user.getEmail());
+                    String token = jwtTokenUtils.generateToken(user);
                     return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
@@ -159,7 +173,18 @@ public class AuthController {
 
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("User : {}", authentication.getName());
+        log.info("Credentials : {}", authentication.getCredentials());
+        if (authentication != null && authentication.isAuthenticated()) {
+            UserEntity user = userService.findUserByEmail(authentication.getName());
+            log.info("Получили пользователя {}", user);
+            log.info("Вызываем delete token");
+            refreshTokenService.deleteToken(user);
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        }
+
         return ResponseEntity.ok().build();
     }
 
