@@ -37,6 +37,16 @@ public class CreateUserDtoRequest {
     @Size(min = 3, max = 50, message = "Код не должен быть меньше {min} символов и не должен быть больше {max} символов")
     private String captchaSecret;
 
+    public CreateUserDtoRequest(String firstName, String lastName, String password1, String password2, String email, String captchaCode, String captchaSecret) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.password1 = password1;
+        this.password2 = password2;
+        this.email = email;
+        this.captchaCode = captchaCode;
+        this.captchaSecret = captchaSecret;
+    }
+
     public String getFirstName() {
         return firstName;
     }

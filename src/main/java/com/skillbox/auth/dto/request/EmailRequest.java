@@ -8,6 +8,10 @@ public class EmailRequest {
     @Email
     private String email;
 
+    public EmailRequest(String email) {
+        this.email = email;
+    }
+
     public String getEmail() {
         return email;
     }
