@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   jpa:
     generate-ddl: off
   datasource:
@@ -52,3 +54,33 @@ app:
     emailChange: "ACCOUNT_CHANGES"
     resetPassword: "NOTIFICATION"
     kafkaMessageGroupId: "socialNetwork-group-id"
+
+management:
+  security:
+    enabled: false
+  endpoint:
+    metrics:
+      access: unrestricted
+    prometheus:
+      access: unrestricted
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, metrics, info, health, shutdown, beans
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+    tags:
+      application: ${spring.application.name}
+
+
+

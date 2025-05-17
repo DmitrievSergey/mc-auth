@@ -75,6 +75,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/change-password-link").permitAll()
                         .requestMatchers("/api/v1/auth/change-email-link").permitAll()
                         .requestMatchers("/api/v1/auth/logout").permitAll()
+                        .requestMatchers("/actuator/prometheus").permitAll()
 
                         .requestMatchers(imageAddress.concat("*")).permitAll()
                 )

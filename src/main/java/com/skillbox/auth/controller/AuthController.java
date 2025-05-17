@@ -21,6 +21,7 @@ import com.skillbox.auth.service.KafkaMessagePublisher;
 import com.skillbox.auth.service.RefreshTokenService;
 import com.skillbox.auth.service.UserService;
 import com.skillbox.auth.security.jwt.JwtTokenUtils;
+import io.micrometer.core.annotation.Timed;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -62,6 +63,7 @@ public class AuthController {
     @Value("${image.address}")
     String imageAddress;
 
+    @Timed(value = "getCaptcha.time", description = "Time taken to return captcha")
     @GetMapping("/captcha")
     ResponseEntity<CaptchaResponse> getCaptcha() throws IOException {
 

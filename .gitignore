@@ -6,3 +6,4 @@ build
 /.idea/
 
 /src/main/resources/static/images/captcha/
+/src/main/resources/.env
