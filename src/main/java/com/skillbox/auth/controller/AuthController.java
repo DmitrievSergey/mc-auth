@@ -39,6 +39,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
@@ -174,20 +175,21 @@ public class AuthController {
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated()) {
+        String email = jwtTokenUtils.getUserName(request.getHeader("Authorization").substring(7));
+        try {
+            UserEntity user = userService.findUserByEmail(email);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             log.info("User : {}", authentication.getName());
             log.info("Credentials : {}", authentication.getCredentials());
-            UserEntity user = userService.findUserByEmail(authentication.getName());
+
             log.info("Получили пользователя {}", user);
             log.info("Вызываем delete token");
             refreshTokenService.deleteToken(user);
             new SecurityContextLogoutHandler().logout(request, response, authentication);
+            return ResponseEntity.ok().build();
+        } catch (UsernameNotFoundException exception) {
+            return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok().build();
-
-
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER')")
