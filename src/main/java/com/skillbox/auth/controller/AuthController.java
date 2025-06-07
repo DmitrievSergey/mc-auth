@@ -175,17 +175,19 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("User : {}", authentication.getName());
-        log.info("Credentials : {}", authentication.getCredentials());
+
         if (authentication != null && authentication.isAuthenticated()) {
+            log.info("User : {}", authentication.getName());
+            log.info("Credentials : {}", authentication.getCredentials());
             UserEntity user = userService.findUserByEmail(authentication.getName());
             log.info("Получили пользователя {}", user);
             log.info("Вызываем delete token");
             refreshTokenService.deleteToken(user);
             new SecurityContextLogoutHandler().logout(request, response, authentication);
         }
-
         return ResponseEntity.ok().build();
+
+
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER')")
@@ -195,6 +197,7 @@ public class AuthController {
         String email = jwtTokenUtils.getUserName(jwt.substring(7));
         if(!email.equals(request.getEmail())) {
             UserEntity user = userService.findUserByEmail(email);
+            refreshTokenService.deleteToken(user);
             user.setEmail(request.getEmail());
             //TODO: Поймать EmailAlreadyExists
             try{
