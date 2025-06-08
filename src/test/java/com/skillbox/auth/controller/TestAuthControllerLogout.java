@@ -33,8 +33,9 @@ public class TestAuthControllerLogout extends AbstractTest {
     @Sql(scripts = "classpath:db/createUser.sql")
     @WithMockUser(username = "alexIv@mail.ru", roles = "USER")
     public void testUserCanLogout() throws Exception {
+        String token = jwtTokenUtils.generateToken(AppUserDetails.build(getAuthorizedUser()));
 
-        ResultActions resultActions = post("/api/v1/auth/logout")
+        ResultActions resultActions = post("/api/v1/auth/logout", "Authorization", "Bearer ".concat(token))
                 .andExpect(status().isOk());
     }
 

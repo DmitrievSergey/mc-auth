@@ -73,9 +73,9 @@ public abstract class AbstractTest implements PostgreBaseTest {
                 .accept(MediaType.APPLICATION_JSON));
     }
 
-    protected ResultActions post(String path) throws Exception {
+    protected ResultActions post(String path, String headerName, String header) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders
-                .post(path)
+                .post(path).header(headerName, header)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
     }
