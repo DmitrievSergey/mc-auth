@@ -65,10 +65,15 @@ public class AuthController {
 
     @GetMapping("/captcha")
     ResponseEntity<CaptchaResponse> getCaptcha() throws IOException {
-
+        log.info("Начинаем генерить imageId");
         String imageId = UUID.randomUUID().toString();
+        log.info("imageId {}",imageId);
         captchaService.saveImageToStorage(imageDirectory, imageId);
+        log.info("Image directory {}", imageDirectory);
         CaptchaResponse data = new CaptchaResponse(imageAddress.concat(imageId), imageId);
+
+        log.info("Captcha data {}", data.getSecret());
+        log.info("Captcha data {}", data.getImage());
 
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
